@@ -1,7 +1,7 @@
 package main
 
-import "github.com/undg/autorotate/cmd"
+import "github.com/fairyhunter13/autorotate/cmd"
 
 func main() {
-	cmd.Execute()
+	_ = cmd.Execute()
 }

@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"github.com/fairyhunter13/autorotate/sys"
 	"github.com/spf13/cobra"
-	"github.com/undg/autorotate/sys"
 )
 
 var portraitCmd = &cobra.Command{

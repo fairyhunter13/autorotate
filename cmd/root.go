@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	"os"
-
 	"github.com/adrg/xdg"
+	"github.com/fairyhunter13/autorotate/sys"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/undg/autorotate/sys"
+	"os"
+	"strings"
 )
 
 // @TODO (undg) 2023-02-06: move it to config
@@ -58,13 +59,16 @@ func initViper() {
 		// Use .config/autorotate.toml file
 		viper.AddConfigPath(xdg.ConfigHome + "/autorotate/")
 		viper.SetConfigType("toml")
-		viper.SetConfigName("config")
+		viper.SetConfigName("autorotate")
 	}
 
 	viper.AutomaticEnv()
+	viper.SetEnvPrefix("AUTOROTATE")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileAlreadyExistsError); ok {
+		var configFileAlreadyExistsError viper.ConfigFileAlreadyExistsError
+		if errors.As(err, &configFileAlreadyExistsError) {
 			fmt.Println("Config file not found.")
 		} else {
 

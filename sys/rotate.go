@@ -1,6 +1,8 @@
 package sys
 
 import (
+	"github.com/fairyhunter13/autorotate/config"
+	glob "github.com/ganbarodigital/go_glob"
 	"log"
 	"os/exec"
 	"strconv"
@@ -21,29 +23,47 @@ func Rotate(screen string, rotate string, matrix string) {
 	if errXrandr != nil {
 		log.Fatal(errXrandr)
 	}
-		
 
 	display := xinput.XOpenDisplay(nil)
 	defer xinput.XCloseDisplay(display)
 
+	devicePatternOnly := config.GetDevicePatternOnly()
+	var globPattern *glob.Glob
+	if devicePatternOnly != "" {
+		globPattern = glob.NewGlob(devicePatternOnly)
+	}
+
 	for _, device := range xinput.GetXDeviceInfos(display) {
-		if device.Use == "slave pointer" {
+		if device.Use != "slave pointer" {
+			continue
+		}
 
-			// @TODO (undg) 2023-02-27: dirty quick fix for external mouses. Should solve problem by config/flag (explicit/implicit/all)
-
-			// don't rotate external device:
-			switch device.Name {
-			case "Razer Razer Basilisk X HyperSpeed": // mouse
-				continue
-			case "Virtual core XTEST pointer": // barrier/synergy
-				continue
+		if globPattern != nil {
+			isMatch, err := globPattern.Match(device.Name)
+			if err != nil {
+				log.Fatalf("Device pattern %s is not valid, err: %v", devicePatternOnly, err)
+				return
 			}
 
-			_, errXinput := exec.Command("sh", "-c", "xinput set-prop "+strconv.FormatUint(device.Id, 10)+" --type=float 'Coordinate Transformation Matrix' "+matrix).Output()
-
-			if errXinput != nil {
-				log.Fatal(errXinput)
+			if !isMatch {
+				continue
 			}
+		}
+
+		// @TODO (undg) 2023-02-27: dirty quick fix for external mouses. Should solve problem by config/flag (explicit/implicit/all)
+
+		// don't rotate external device:
+		switch device.Name {
+		case "Razer Razer Basilisk X HyperSpeed": // mouse
+			continue
+		case "Virtual core XTEST pointer": // barrier/synergy
+			continue
+		}
+
+		_, errXinput := exec.Command("sh", "-c", "xinput set-prop "+strconv.FormatUint(device.Id, 10)+" --type=float 'Coordinate Transformation Matrix' "+matrix).Output()
+
+		if errXinput != nil {
+			log.Fatal(errXinput)
 		}
 	}
 }

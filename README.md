@@ -3,7 +3,7 @@
 `autorotate` is Linux/X11 utility for 2in1 laptops and other devices with touchscreen. No ROOT privileges necessary!
 
 ## Install
-Download and unzip [autorotate.zip](https://github.com/undg/autorotate/releases/latest). Give execution permission with command:
+Download and unzip [autorotate.zip](https://github.com/fairyhunter13/autorotate/releases/latest). Give execution permission with command:
 
 ```
 unzip autorotate.zip
